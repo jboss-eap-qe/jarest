@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.jboss.eap.qa</groupId>
+    <artifactId>jarest</artifactId>
+    <version>1.0.0.Final-SNAPSHOT</version>
+    <name>jar(t)est - testsuite for structural checks for Java 9+</name>
+
+    <parent>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-parent</artifactId>
+        <version>26</version>
+    </parent>
+
+    <properties>
+        <jarest.input.dir>IF-NOT-DEFINED-WILDFLY-WILL-BE-DOWNLOADED-UNZIPPED-AND-USED-AUTOMATICALLY</jarest.input.dir>
+        <jarest.input.zip.url>IF-NOT-DEFINED-WILDFLY-WILL-BE-DOWNLOADED-UNZIPPED-AND-USED-AUTOMATICALLY</jarest.input.zip.url>
+
+        <maven.compiler.target>9</maven.compiler.target>
+        <maven.compiler.source>9</maven.compiler.source>
+        <maven.compiler.testTarget>${maven.compiler.target}</maven.compiler.testTarget>
+        <maven.compiler.testSource>${maven.compiler.source}</maven.compiler.testSource>
+        <maven.test.redirectTestOutputToFile>false</maven.test.redirectTestOutputToFile>
+
+        <version.junit.jupiter>5.1.0</version.junit.jupiter>
+        <version.junit.platform>1.1.0</version.junit.platform>
+        <version.org.jboss.wildfly.dist>12.0.0.Final</version.org.jboss.wildfly.dist>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>jboss-public</id>
+            <name>JBoss Nexus Public Repository</name>
+            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${version.junit.jupiter}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wildfly</groupId>
+            <artifactId>wildfly-dist</artifactId>
+            <version>${version.org.jboss.wildfly.dist}</version>
+            <type>zip</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version> <!-- https://junit.org/junit5/docs/current/user-guide/#running-tests-build-maven -->
+                <dependencies>
+                    <dependency>
+                        <groupId>org.junit.platform</groupId>
+                        <artifactId>junit-platform-surefire-provider</artifactId>
+                        <version>${version.junit.platform}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <systemPropertyVariables>
+                        <jarest.input.dir>${jarest.input.dir}</jarest.input.dir>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>workaround-for-activeByDefault-behavior</id>
+            <!-- http://greyfocus.com/2015/06/activebydefault-maven-other-profiles/ -->
+            <activation>
+                <property><name>jarest.input.dir</name></property>
+            </activation>
+        </profile>
+        <profile>
+            <id>download-wildfly</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <jarest.input.dir>${basedir}/target/input-dir</jarest.input.dir>
+                <wildfly.zip.root.dir.name>wildfly</wildfly.zip.root.dir.name>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unpack-wildfly</id>
+                                <phase>generate-test-resources</phase>
+                                <goals><goal>unpack</goal></goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.wildfly</groupId>
+                                            <artifactId>wildfly-dist</artifactId>
+                                            <version>${version.org.jboss.wildfly.dist}</version>
+                                            <type>zip</type>
+                                            <overWrite>true</overWrite>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>rename-wildfly</id>
+                                <phase>process-test-resources</phase>
+                                <goals><goal>run</goal></goals>
+                                <configuration>
+                                    <target>
+                                        <delete dir="${project.build.directory}/input-dir"/>
+                                        <move todir="${project.build.directory}/input-dir">
+                                            <fileset dir="${project.build.directory}">
+                                                <include name="${wildfly.zip.root.dir.name}*/**/*"/>
+                                            </fileset>
+                                            <cutdirsmapper dirs="1"/>
+                                        </move>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>download-zip-from-url</id>
+            <activation>
+                <property><name>jarest.input.zip.url</name></property>
+            </activation>
+            <properties>
+                <jarest.input.dir>${basedir}/target/input-dir</jarest.input.dir>
+                <jarest.input.zip.root.dir.name>wildfly</jarest.input.zip.root.dir.name>
+                <jarest.input.zip.root.dir.jboss.name>jboss</jarest.input.zip.root.dir.jboss.name>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.googlecode.maven-download-plugin</groupId>
+                        <artifactId>download-maven-plugin</artifactId>
+                        <version>1.4.0</version>
+                        <executions>
+                            <execution>
+                                <id>install-server</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>${jarest.input.zip.url}</url>
+                                    <unpack>true</unpack>
+                                    <overwrite>true</overwrite>
+                                    <skipCache>true</skipCache>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>rename-unpacked-zip-dir</id>
+                                <phase>process-test-resources</phase>
+                                <goals><goal>run</goal></goals>
+                                <configuration>
+                                    <target>
+                                        <delete dir="${project.build.directory}/input-dir"/>
+                                        <move todir="${project.build.directory}/input-dir">
+                                            <fileset dir="${project.build.directory}">
+                                                <include name="${jarest.input.zip.root.dir.name}*/**/*"/>
+                                                <include name="${jarest.input.zip.root.dir.jboss.name}*/**/*"/>
+                                            </fileset>
+                                            <cutdirsmapper dirs="1"/>
+                                        </move>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
+
+</project>
