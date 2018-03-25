@@ -22,23 +22,33 @@
 
 package org.jboss.eap.qa.jarest;
 
-import org.junit.jupiter.api.Test;
+import java.util.Set;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+public final class Configuration {
+    private static Configuration instance;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+    public synchronized static Configuration get() {
+        if (instance != null) {
+            return instance;
+        }
 
-public class PropertyTestCase {
+        instance = new Configuration();
+        return instance;
+    }
 
-    @Test
-    void jarestInputDir() throws IOException {
-        String jarestInputDir = System.getProperty("jarest.input.dir", "N/A");
-        System.out.println("jarest.input.dir: " + jarestInputDir);
-        assertNotEquals("N/A", jarestInputDir);
+    private Configuration() {
+    }
 
-        Files.list(Paths.get(jarestInputDir))
-                .forEach(System.out::println);
+    // TODO consider PathMatcher
+    public Set<String> expectedMRv9JarNames() {
+        return Set.of(
+                "wildfly-elytron-tool.jar",
+                "jboss-cli-client.jar",
+                "jboss-client.jar",
+                "jboss-modules.jar",
+                "wildfly-common-",
+                "jboss-marshalling-2",  // vs. jboss-marshalling-river-2.0.4.Final.jar
+                "openjdk-orb-"
+        );
     }
 }
