@@ -41,17 +41,33 @@ public class DistributionTestCase {
     }
 
     @Test
-    void checkUnexpectedMRv9JARs() throws IOException {
+    void checkUnexpectedOverlayDirectoryForJava9() throws IOException {
         SoftAssertions softly = new SoftAssertions();
-        distributionDir.jarsAsZipFiles()
-                .filter(zipFile -> config.expectedMRv9JarNames().stream()
-                        .noneMatch(jarName -> Paths.get(zipFile.getName()).getFileName().toString().contains(jarName))
+        distributionDir.jars()
+                .filter(jar -> config.expectedMRv9JarNames().stream()
+                        .noneMatch(jarName -> jar.baseFileName().startsWith(jarName))
                 )
-                .forEach(zipFile -> {
+                .forEach(jar -> {
                             softly.assertThat(
-                                    zipFile.stream()
-                                            .noneMatch(entry -> entry.getName().contains("META-INF/versions/9")))
-                                    .as("Artifact %s can't be Multi-Release JAR", zipFile.getName())
+                                    jar.hasOverlayDirectory(9))
+                                    .as("Artifact %s is not expected to be Multi-Release JAR", jar.file())
+                                    .isFalse();
+                        }
+                );
+        softly.assertAll();
+    }
+
+    @Test
+    void checkExpectedOverlayDirectoryForJava9() throws IOException {
+        SoftAssertions softly = new SoftAssertions();
+        distributionDir.jars()
+                .filter(jar -> config.expectedMRv9JarNames().stream()
+                        .anyMatch(jarName -> jar.baseFileName().startsWith(jarName))
+                )
+                .forEach(jar -> {
+                            softly.assertThat(
+                                    jar.hasOverlayDirectory(9))
+                                    .as("Artifact %s is expected to be Multi-Release JAR", jar.file())
                                     .isTrue();
                         }
                 );
@@ -59,17 +75,18 @@ public class DistributionTestCase {
     }
 
     @Test
-    void checkExpectedMRv9JARs() throws IOException {
+    void checkOverlayDirectoryAndManifestEntryForExpectedMRJars() throws IOException {
         SoftAssertions softly = new SoftAssertions();
-        distributionDir.jarsAsZipFiles()
-                .filter(zipFile -> config.expectedMRv9JarNames().stream()
-                        .anyMatch(jarName -> Paths.get(zipFile.getName()).getFileName().toString().contains(jarName))
+        distributionDir.jars()
+                .filter(jar -> config.expectedMRv9JarNames().stream()
+                        .anyMatch(jarName -> jar.baseFileName().startsWith(jarName))
                 )
-                .forEach(zipFile -> {
+                .forEach(jar -> {
                             softly.assertThat(
-                                    zipFile.stream()
-                                            .anyMatch(entry -> entry.getName().contains("META-INF/versions/9")))
-                                    .as("Artifact %s is expected to be Multi-Release JAR", zipFile.getName())
+                                    jar.hasOverlayDirectory()
+                                            && jar.isMultiReleaseJar())
+                                    .as("Artifact %s is expected to be Multi-Release JAR, jar.isMultiReleaseJar() returns %s",
+                                            jar.file(), jar.isMultiReleaseJar())
                                     .isTrue();
                         }
                 );
@@ -79,17 +96,19 @@ public class DistributionTestCase {
     @Test
     void atMostMRv9JARsPresent() throws IOException {
         SoftAssertions softly = new SoftAssertions();
-        distributionDir.jarsAsZipFiles()
-                .forEach(zipFile -> {
+        distributionDir.jars()
+                .filter(jar -> jar.hasOverlayDirectory())
+                .forEach(jar -> {
                             softly.assertThat(
-                                    zipFile.stream()
-                                            .filter(entry -> entry.getName().contains("META-INF/versions"))
-                                            .filter(entry -> !entry.getName().contains("META-INF/versions/9"))
-                                            .filter(entry -> !entry.getName().equals("META-INF/versions/"))
-                                            .peek(System.out::println)
-                                            .count())
-                                    .as("Artifact %s is expected to be at most versions/9 Multi-Release JAR", zipFile.getName())
-                                    .isEqualTo(0);
+                                    jar.hasOverlayDirectory(9)
+                                            && ! jar.hasOverlayDirectory(10)
+                                            && ! jar.hasOverlayDirectory(11)
+                                            && ! jar.hasOverlayDirectory(12)
+                                            && ! jar.hasOverlayDirectory(13)
+                                            && ! jar.hasOverlayDirectory(14)
+                                    )
+                                    .as("Artifact %s is expected to be at most versions/9 Multi-Release JAR", jar.file())
+                                    .isTrue();
                         }
                 );
         softly.assertAll();

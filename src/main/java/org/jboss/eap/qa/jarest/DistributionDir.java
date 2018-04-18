@@ -53,14 +53,19 @@ public class DistributionDir {
                 .filter(Files::isRegularFile);
     }
 
-    public Stream<Path> jars() throws IOException {
+    private Stream<Path> jarPaths() throws IOException {
         return Files.walk(rootDirectory)
                 .filter(Files::isRegularFile)
                 .filter(path -> path.toString().endsWith(".jar"));
     }
 
+    public Stream<JarArtifact> jars() throws IOException {
+        return jarPaths()
+                .map(path -> new JarArtifact(path));
+    }
+
     public Stream<ZipFile> jarsAsZipFiles() throws IOException {
-        return jars()
+        return jarPaths()
                 .map(path -> {
                     try {
                         return new ZipFile(path.toFile());
@@ -71,7 +76,7 @@ public class DistributionDir {
     }
 
     public Stream<ZipFile> jarsAsJarFiles() throws IOException {
-        return jars()
+        return jarPaths()
                 .map(path -> {
                     try {
                         return new JarFile(path.toFile(), false);
@@ -80,6 +85,7 @@ public class DistributionDir {
                     }
                 });
     }
+
     @Override
     public String toString() {
         return "Distribution directory " + rootDirectory;

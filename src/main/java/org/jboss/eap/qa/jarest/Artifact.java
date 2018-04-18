@@ -22,36 +22,45 @@
 
 package org.jboss.eap.qa.jarest;
 
-import java.util.Set;
+import java.nio.file.Path;
+import java.util.Objects;
 
-public final class Configuration {
-    private static Configuration instance;
+public class Artifact {
+    final Path file;
+    private final String baseFileName;
 
-    public synchronized static Configuration get() {
-        if (instance != null) {
-            return instance;
-        }
-
-        instance = new Configuration();
-        return instance;
+    public Artifact(Path file) {
+        this.file = file;
+        this.baseFileName = file.getFileName().toString();
     }
 
-    private Configuration() {
+    public Path file() {
+        return file;
     }
 
-    // TODO consider PathMatcher
-    public Set<String> expectedMRv9JarNames() {
-        return Set.of(
-                // TODO double-check
-                "wildfly-elytron-tool.jar",
-                "jboss-cli-client.jar",
-                "jboss-client.jar",
-                "openjdk-orb-",
-                // from MR JAR Support in JBoss Parent document:
-                "jboss-modules.jar",
-                "jboss-logmanager-",
-                "wildfly-common-",
-                "jboss-marshalling-2"  // vs. jboss-marshalling-river-2.0.4.Final.jar
-        );
+    public Path directory() {
+        return file.getParent();
+    }
+
+    public String baseFileName() {
+        return baseFileName;
+    }
+
+    @Override
+    public String toString() {
+        return "artifact " + baseFileName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Artifact)) return false;
+        Artifact artifact = (Artifact) o;
+        return Objects.equals(file, artifact.file);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(file);
     }
 }
