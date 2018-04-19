@@ -25,6 +25,7 @@ package org.jboss.eap.qa.jarest;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -45,10 +46,22 @@ public class JarArtifact extends Artifact {
         }
     }
 
-    public boolean hasOverlayDirectory(int javaVersion) {
+    public boolean hasOverlayDirectoryFor(int javaVersion) {
         try (ZipFile zip = new ZipFile(file.toFile())) {
             return zip.stream()
                     .anyMatch(entry -> entry.getName().contains("META-INF/versions/" + javaVersion));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public boolean hasJustOverlayDirectoriesFor(int... javaVersions) {
+        try (ZipFile zip = new ZipFile(file.toFile())) {
+            return zip.stream()
+                    .filter(entry -> entry.getName().matches("META-INF/versions/\\d(.*)"))
+                    .allMatch(entry -> Arrays.stream(javaVersions)
+                                                .mapToObj(i -> "META-INF/versions/" + i)
+                                                .anyMatch(entry.getName()::contains));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
