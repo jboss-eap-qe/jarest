@@ -49,7 +49,7 @@ public class DistributionTestCase {
                 )
                 .forEach(jar -> {
                             softly.assertThat(
-                                    jar.hasOverlayDirectory(9))
+                                    jar.hasOverlayDirectoryFor(9))
                                     .as("Artifact %s is not expected to be Multi-Release JAR", jar.file())
                                     .isFalse();
                         }
@@ -66,7 +66,7 @@ public class DistributionTestCase {
                 )
                 .forEach(jar -> {
                             softly.assertThat(
-                                    jar.hasOverlayDirectory(9))
+                                    jar.hasOverlayDirectoryFor(9))
                                     .as("Artifact %s is expected to be Multi-Release JAR", jar.file())
                                     .isTrue();
                         }
@@ -99,14 +99,7 @@ public class DistributionTestCase {
         distributionDir.jars()
                 .filter(jar -> jar.hasOverlayDirectory())
                 .forEach(jar -> {
-                            softly.assertThat(
-                                    jar.hasOverlayDirectory(9)
-                                            && ! jar.hasOverlayDirectory(10)
-                                            && ! jar.hasOverlayDirectory(11)
-                                            && ! jar.hasOverlayDirectory(12)
-                                            && ! jar.hasOverlayDirectory(13)
-                                            && ! jar.hasOverlayDirectory(14)
-                                    )
+                            softly.assertThat(jar.hasJustOverlayDirectoriesFor(9))
                                     .as("Artifact %s is expected to be at most versions/9 Multi-Release JAR", jar.file())
                                     .isTrue();
                         }
