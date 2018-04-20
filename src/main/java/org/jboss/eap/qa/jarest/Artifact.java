@@ -27,11 +27,24 @@ import java.util.Objects;
 
 public class Artifact {
     final Path file;
-    private final String baseFileName;
+    private final String baseFileName, baseFileNameWithoutVersion;
 
     public Artifact(Path file) {
         this.file = file;
         this.baseFileName = file.getFileName().toString();
+        if (baseFileName.contains("-")) {
+            if (baseFileName.contains("redhat-")) {
+                this.baseFileNameWithoutVersion = baseFileName
+                        .substring(0, baseFileName.lastIndexOf("-"))
+                        .substring(0, baseFileName.lastIndexOf("-"));
+            } else {
+                this.baseFileNameWithoutVersion = baseFileName
+                        .substring(0, baseFileName.lastIndexOf("-"));
+            }
+        } else { // e.g. modules.jar
+            this.baseFileNameWithoutVersion = baseFileName
+                    .substring(0, baseFileName.lastIndexOf(".jar"));
+        }
     }
 
     public Path file() {
@@ -44,6 +57,10 @@ public class Artifact {
 
     public String baseFileName() {
         return baseFileName;
+    }
+
+    public String baseFileNameWithoutVersion() {
+        return baseFileNameWithoutVersion;
     }
 
     @Override
