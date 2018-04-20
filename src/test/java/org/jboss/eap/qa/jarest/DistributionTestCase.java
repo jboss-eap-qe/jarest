@@ -28,6 +28,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Comparator;
+import java.util.Map;
 
 public class DistributionTestCase {
     private static DistributionDir distributionDir;
@@ -102,6 +104,68 @@ public class DistributionTestCase {
                             softly.assertThat(jar.hasJustOverlayDirectoriesFor(9))
                                     .as("Artifact %s is expected to be at most versions/9 Multi-Release JAR", jar.file())
                                     .isTrue();
+                        }
+                );
+        softly.assertAll();
+    }
+
+    @Test
+    void checkAutomaticModuleNamePresence() throws IOException {
+        SoftAssertions softly = new SoftAssertions();
+        Map<String, String> expectedNames = config.expectedAutomaticModuleNames();
+        distributionDir.jars()
+                .filter(jar -> expectedNames.containsKey(jar.baseFileNameWithoutVersion()))
+                .sorted(Comparator.comparing(jar -> jar.baseFileName()))
+                .forEach(jar -> {
+                            softly.assertThat(
+                                    jar.getAutomaticModuleNameFromManifest().isPresent())
+                                    .as("Artifact %s has no Automatic-Module-Name", jar.baseFileName())
+                                    .isTrue();
+                        }
+                );
+        softly.assertAll();
+    }
+
+    @Test
+    void checkExpectedAutomaticModuleNames() throws IOException {
+        SoftAssertions softly = new SoftAssertions();
+        Map<String, String> expectedNames = config.expectedAutomaticModuleNames();
+        distributionDir.jars()
+                .filter(jar -> jar.getAutomaticModuleNameFromManifest().isPresent())
+                .filter(jar -> expectedNames.containsKey(jar.baseFileNameWithoutVersion()))
+                .sorted(Comparator.comparing(jar -> jar.baseFileName()))
+                .forEach(jar -> {
+                            String moduleName = jar.getAutomaticModuleNameFromManifest().get();
+//                            System.out.println(jar
+//                                    + "\t-\t" + jar.baseFileNameWithoutVersion()
+//                                    + "\t-\t" + moduleName);
+                            softly.assertThat(
+                                    expectedNames.get(jar.baseFileNameWithoutVersion()).equals(moduleName))
+                                    .as("Artifact %s has unexpected Automatic-Module-Name %s, expected was %s",
+                                            jar.baseFileName(), moduleName, expectedNames.get(jar.baseFileNameWithoutVersion()))
+                                    .isTrue();
+                        }
+                );
+        softly.assertAll();
+    }
+
+    @Test
+    void listUntrackedFilesWithAutomaticModuleNames() throws IOException {
+        SoftAssertions softly = new SoftAssertions();
+        Map<String, String> expectedNames = config.expectedAutomaticModuleNames();
+        distributionDir.jars()
+                .filter(jar -> jar.getAutomaticModuleNameFromManifest().isPresent())
+                .filter(jar -> ! expectedNames.containsKey(jar.baseFileNameWithoutVersion()))
+                .sorted(Comparator.comparing(jar -> jar.baseFileName()))
+                .forEach(jar -> {
+                            String moduleName = jar.getAutomaticModuleNameFromManifest().get();
+                            System.out.println(jar
+                                    + "\t-\t" + moduleName);
+//                            softly.assertThat(
+//                                    expectedNames.get(jar.baseFileNameWithoutVersion()).equals(moduleName))
+//                                    .as("Artifact %s has unexpected Automatic-Module-Name %s, expected was %s",
+//                                            jar.baseFileName(), moduleName, expectedNames.get(jar.baseFileNameWithoutVersion()))
+//                                    .isTrue();
                         }
                 );
         softly.assertAll();
