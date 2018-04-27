@@ -76,6 +76,15 @@ public class JarArtifact extends Artifact {
         }
     }
 
+    public boolean hasModuleInfoClass() {
+        try (ZipFile zip = new ZipFile(file.toFile())) {
+            return zip.stream()
+                    .anyMatch(entry -> entry.getName().equals("module-info.class"));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     public Optional<String> getSpecificationVersionFromManifest() {
         return getMainAttributeFromManifest("Specification-Version");
     }

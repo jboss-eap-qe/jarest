@@ -170,4 +170,38 @@ public class DistributionTestCase {
                 );
         softly.assertAll();
     }
+
+    @Test
+    void checkUnexpectedJarsWithModuleInfoClass() throws IOException {
+        SoftAssertions softly = new SoftAssertions();
+        distributionDir.jars()
+                .filter(jar -> config.expectedModuleInfoJarNames().stream()
+                        .noneMatch(jarName -> jar.baseFileName().startsWith(jarName))
+                )
+                .forEach(jar -> {
+                            softly.assertThat(
+                                    jar.hasModuleInfoClass())
+                                    .as("Artifact %s is not expected to contain module-info.class", jar.baseFileName())
+                                    .isFalse();
+                        }
+                );
+        softly.assertAll();
+    }
+
+    @Test
+    void checkExpectedJarsWithModuleInfoClass() throws IOException {
+        SoftAssertions softly = new SoftAssertions();
+        distributionDir.jars()
+                .filter(jar -> config.expectedModuleInfoJarNames().stream()
+                        .anyMatch(jarName -> jar.baseFileName().startsWith(jarName))
+                )
+                .forEach(jar -> {
+                            softly.assertThat(
+                                    jar.hasModuleInfoClass())
+                                    .as("Artifact %s is expected to contain module-info.class", jar.baseFileName())
+                                    .isTrue();
+                        }
+                );
+        softly.assertAll();
+    }
 }
