@@ -68,6 +68,14 @@ public final class Configuration {
         );
     }
 
+    public Set<String> clientJarNames() {
+        return Set.of(
+                "jboss-client.jar",
+                "jboss-cli-client.jar",
+                "wildfly-elytron-tool.jar"
+        );
+    }
+
     public Map<String, String> expectedAutomaticModuleNames() {
         Map<String, String> map = new HashMap<>(20);
 

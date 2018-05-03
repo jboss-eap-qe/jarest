@@ -27,8 +27,11 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class JarArtifact extends Artifact {
@@ -117,4 +120,22 @@ public class JarArtifact extends Artifact {
             throw new UncheckedIOException(e);
         }
     }
+
+    public Set<String> packages() {
+        try (ZipFile zip = new ZipFile(file.toFile())) {
+            return zip.stream()
+                    .filter(entry -> entry.getName().endsWith(".class") && entry.getName().contains("/"))
+                    .map(this::extractPackageFromZipEntry)
+                    .distinct()
+                    .collect(Collectors.toSet());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+    private String extractPackageFromZipEntry (ZipEntry entry) {
+        return entry.getName()
+                .substring(0, entry.getName().lastIndexOf("/"))
+                .replaceAll("\\/", ".");
+    }
+
 }
