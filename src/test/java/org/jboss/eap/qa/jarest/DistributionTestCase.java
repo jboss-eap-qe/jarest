@@ -23,13 +23,17 @@
 package org.jboss.eap.qa.jarest;
 
 import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 public class DistributionTestCase {
     private static DistributionDir distributionDir;
@@ -202,6 +206,35 @@ public class DistributionTestCase {
                                     .isTrue();
                         }
                 );
+        softly.assertAll();
+    }
+
+    @Test
+    void duplicatedPackagesInJars() throws IOException {
+        SoftAssertions softly = new SoftAssertions();
+        Map<String, List<String>> packagesInJars = new TreeMap<>();
+        Set<String> clientJarNames = config.clientJarNames();
+
+        distributionDir.jars()
+                .filter(jar -> ! clientJarNames.contains(jar.baseFileName()))
+                .forEach(jar ->
+                            jar.packages().forEach(pkg -> {
+                                if (packagesInJars.containsKey(pkg)) {
+                                    packagesInJars.get(pkg).add(jar.baseFileName());
+                                } else {
+                                    packagesInJars.put(pkg, Lists.newArrayList(jar.baseFileName()));
+                                }
+                            })
+                );
+
+        packagesInJars.entrySet()
+                .forEach(entry -> {
+                            softly.assertThat(entry.getValue().size())
+                                    .as("Package %s is present in multiple jars %s", entry.getKey(), entry.getValue())
+                                    .isEqualTo(1);
+                        }
+                );
+
         softly.assertAll();
     }
 }
