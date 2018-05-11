@@ -25,8 +25,8 @@
         <maven.compiler.testSource>${maven.compiler.source}</maven.compiler.testSource>
         <maven.test.redirectTestOutputToFile>false</maven.test.redirectTestOutputToFile>
 
-        <version.junit.jupiter>5.1.0</version.junit.jupiter>
-        <version.junit.platform>1.1.0</version.junit.platform>
+        <version.junit.jupiter>5.2.0</version.junit.jupiter>
+        <version.junit.platform>1.2.0</version.junit.platform>
         <version.org.assertj.assertj-core>3.9.1</version.org.assertj.assertj-core>
         <version.org.jboss.wildfly.dist>12.0.0.Final</version.org.jboss.wildfly.dist>
     </properties>
