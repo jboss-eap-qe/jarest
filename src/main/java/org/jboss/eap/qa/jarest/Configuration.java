@@ -58,6 +58,16 @@ public final class Configuration {
         );
     }
 
+    public Set<String> expectedMRv10JarNames() {
+        return Set.of();
+        // __TODO__   needs to be discussed on JIRA first
+        // infinispan-commons-9.3.3.Final.jar ... layer 9 vs. 10 ? missing Multi-Release in manifest ?
+    }
+
+    public Set<String> expectedMRv11JarNames() {
+        return Set.of();
+    }
+
     public Set<String> expectedModuleInfoJarNames() {
         return Set.of(
                 "asm-",
