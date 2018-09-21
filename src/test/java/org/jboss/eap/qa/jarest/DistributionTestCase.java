@@ -56,7 +56,41 @@ public class DistributionTestCase {
                 .forEach(jar -> {
                             softly.assertThat(
                                     jar.hasOverlayDirectoryFor(9))
-                                    .as("Artifact %s is not expected to be Multi-Release JAR", jar.file())
+                                    .as("Artifact %s is not expected to be Multi-Release JAR with overlay 9", jar.file())
+                                    .isFalse();
+                        }
+                );
+        softly.assertAll();
+    }
+
+    @Test
+    void checkUnexpectedOverlayDirectoryForJava10() throws IOException {
+        SoftAssertions softly = new SoftAssertions();
+        distributionDir.jars()
+                .filter(jar -> config.expectedMRv10JarNames().stream()
+                        .noneMatch(jarName -> jar.baseFileName().startsWith(jarName))
+                )
+                .forEach(jar -> {
+                            softly.assertThat(
+                                    jar.hasOverlayDirectoryFor(10))
+                                    .as("Artifact %s is not expected to be Multi-Release JAR with overlay 10", jar.file())
+                                    .isFalse();
+                        }
+                );
+        softly.assertAll();
+    }
+
+    @Test
+    void checkUnexpectedOverlayDirectoryForJava11() throws IOException {
+        SoftAssertions softly = new SoftAssertions();
+        distributionDir.jars()
+                .filter(jar -> config.expectedMRv11JarNames().stream()
+                        .noneMatch(jarName -> jar.baseFileName().startsWith(jarName))
+                )
+                .forEach(jar -> {
+                            softly.assertThat(
+                                    jar.hasOverlayDirectoryFor(11))
+                                    .as("Artifact %s is not expected to be Multi-Release JAR with overlay 11", jar.file())
                                     .isFalse();
                         }
                 );
@@ -93,6 +127,36 @@ public class DistributionTestCase {
                                             && jar.isMultiReleaseJar())
                                     .as("Artifact %s is expected to be Multi-Release JAR, jar.isMultiReleaseJar() returns %s",
                                             jar.file(), jar.isMultiReleaseJar())
+                                    .isTrue();
+                        }
+                );
+        softly.assertAll();
+    }
+
+    @Test
+    void checkIfOverlayDirectoryPresentWhenManifestEntryDefined() throws IOException {
+        SoftAssertions softly = new SoftAssertions();
+        distributionDir.jars()
+                .filter(jar -> jar.isMultiReleaseJar())
+                .forEach(jar -> {
+                            softly.assertThat(
+                                    jar.hasOverlayDirectory())
+                                    .as("Artifact %s is expected to have META-INF/versions overlay directory", jar.file())
+                                    .isTrue();
+                        }
+                );
+        softly.assertAll();
+    }
+
+    @Test
+    void checkIfManifestEntryDefinedWhenOverlayDirectoryPresent() throws IOException {
+        SoftAssertions softly = new SoftAssertions();
+        distributionDir.jars()
+                .filter(jar -> jar.hasOverlayDirectory())
+                .forEach(jar -> {
+                            softly.assertThat(
+                                    jar.isMultiReleaseJar())
+                                    .as("Artifact %s is expected to have 'Multi-Release: true' entry in META-INF/MANIFEST.MF", jar.file())
                                     .isTrue();
                         }
                 );
