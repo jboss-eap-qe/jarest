@@ -54,7 +54,10 @@ public final class Configuration {
                 "jboss-modules.jar",
                 "jboss-logmanager-",
                 "wildfly-common-",
-                "jboss-marshalling-2"  // vs. jboss-marshalling-river-2.0.4.Final.jar
+                "jboss-marshalling-2",  // vs. jboss-marshalling-river-2.0.4.Final.jar
+                "wildfly-elytron-1",  // vs. wildfly-elytron-integration-7.0.0.Alpha4.jar
+                "jaxb-xjc-2.3",
+                "jaxb-jxc-2.3"
         );
     }
 
@@ -74,7 +77,15 @@ public final class Configuration {
                 "javax.json-1.1",
                 "javax.json-api-1.1",
                 "javax.json.bind-api-1.0",
-                "yasson-1.0"
+                "yasson-1.0",
+                "xsom-2.3",
+                "txw2-2.3",
+                "codemodel-2.3",
+                "jaxb-runtime-2.3",
+                "rngom-2.3",
+                "jaxb-xjc-2.3",
+                "jaxb-jxc-2.3",
+                "relaxng-datatype-2.3"
         );
     }
 
