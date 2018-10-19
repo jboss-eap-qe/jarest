@@ -27,7 +27,7 @@
 
         <version.junit.jupiter>5.2.0</version.junit.jupiter>
         <version.junit.platform>1.2.0</version.junit.platform>
-        <version.org.assertj.assertj-core>3.9.1</version.org.assertj.assertj-core>
+        <version.org.assertj.assertj-core>3.10.0</version.org.assertj.assertj-core>
         <version.org.jboss.wildfly.dist>12.0.0.Final</version.org.jboss.wildfly.dist>
     </properties>
 
@@ -64,7 +64,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version> <!-- https://junit.org/junit5/docs/current/user-guide/#running-tests-build-maven -->
+                <version>2.22.1</version> <!-- https://junit.org/junit5/docs/current/user-guide/#running-tests-build-maven -->
                 <dependencies>
                     <dependency>
                         <groupId>org.junit.platform</groupId>
