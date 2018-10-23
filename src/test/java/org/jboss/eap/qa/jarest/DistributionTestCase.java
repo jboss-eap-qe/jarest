@@ -164,13 +164,14 @@ public class DistributionTestCase {
     }
 
     @Test
-    void atMostMRv9JARsPresent() throws IOException {
+    void atMostMRv9or10JARsPresent() throws IOException {
         SoftAssertions softly = new SoftAssertions();
         distributionDir.jars()
                 .filter(jar -> jar.hasOverlayDirectory())
                 .forEach(jar -> {
-                            softly.assertThat(jar.hasJustOverlayDirectoriesFor(9))
-                                    .as("Artifact %s is expected to be at most versions/9 Multi-Release JAR", jar.file())
+                            softly.assertThat(jar.hasJustOverlayDirectoriesFor(9) ||
+                                                jar.hasJustOverlayDirectoriesFor(10))
+                                    .as("Artifact %s is expected to be at most versions/9 or versions/10 Multi-Release JAR", jar.file())
                                     .isTrue();
                         }
                 );
