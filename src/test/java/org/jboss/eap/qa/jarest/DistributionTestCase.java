@@ -25,6 +25,7 @@ package org.jboss.eap.qa.jarest;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -271,10 +272,16 @@ public class DistributionTestCase {
                                     .isTrue();
                         }
                 );
+//        known issues
+//        https://issues.jboss.org/browse/JBEAP-15773
+//        https://issues.jboss.org/browse/JBEAP-15772
+//        https://issues.jboss.org/browse/JBEAP-15771
+//        https://issues.jboss.org/browse/JBEAP-15770
         softly.assertAll();
     }
 
     @Test
+    @Disabled("This test is not requred to pass as jigsaw mode is not supported")
     void duplicatedPackagesInJars() throws IOException {
         SoftAssertions softly = new SoftAssertions();
         Map<String, List<String>> packagesInJars = new TreeMap<>();

@@ -55,7 +55,8 @@ public final class Configuration {
                 "jboss-logmanager-",
                 "wildfly-common-",
                 "jboss-marshalling-2",  // vs. jboss-marshalling-river-2.0.4.Final.jar
-                "wildfly-elytron-1",  // vs. wildfly-elytron-integration-7.0.0.Alpha4.jar
+                // Wildfly Elytron 1.6 is not yet MR jar, 1.7 has MR support
+//                "wildfly-elytron-1",  // vs. wildfly-elytron-integration-7.0.0.Alpha4.jar
                 "jaxb-xjc-2.3",
                 "jaxb-jxc-2.3"
         );
